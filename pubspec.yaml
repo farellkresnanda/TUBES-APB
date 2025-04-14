@@ -1,0 +1,32 @@
+name: tubes_1
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.0
+
+flutter:
+  uses-material-design: true
+
+  assets: 
+      - assets/logo.png
+      - assets/Background_1.png
+
+dependencies:
+  flutter:
+    sdk: flutter
+  supabase_flutter: ^2.8.4
+  crypto: ^3.0.6
+  async: ^2.12.0
+  fake_async: ^1.3.2
+  leak_tracker: ^10.0.8
+  image_picker: ^1.0.7
+  material_color_utilities: ^0.11.1
+  vm_service: ^14.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
