@@ -4,7 +4,9 @@ import 'profile_screen.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
 import 'package:tubes_1/screens/login_screen.dart';
-
+import 'package:tubes_1/screens/bangunan_screen.dart';
+import 'package:tubes_1/screens/kelistrikan_screen.dart';
+import 'package:tubes_1/screens/air_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -103,10 +105,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildCategoryItem(Icons.home, 'Bangunan'),
-                        _buildCategoryItem(Icons.electrical_services, 'Kelistrikan'),
-                        _buildCategoryItem(Icons.water_drop, 'Air'),
-                      ],
+                      _buildCategoryItem(Icons.home, 'Bangunan', () {
+                        Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => BangunanScreen()));
+                      }),
+                      _buildCategoryItem(Icons.electrical_services, 'Kelistrikan', () {
+                        Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => KelistrikanScreen()));
+                      }),
+                      _buildCategoryItem(Icons.water_drop, 'Air', () {
+                        Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => AirScreen()));
+                      }),
+                    ],
                     ),
                     const SizedBox(height: 20),
                     const Text(
@@ -240,18 +251,22 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     /// Widget untuk Kategori Tukang
-    Widget _buildCategoryItem(IconData icon, String label) {
-      return Column(
-        children: [
-          CircleAvatar(
-            radius: 30,
-            child: Icon(icon, size: 30),
-          ),
-          const SizedBox(height: 5),
-          Text(label),
-        ],
+   Widget _buildCategoryItem(IconData icon, String label, VoidCallback onTap) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 30,
+              child: Icon(icon, size: 30),
+            ),
+            const SizedBox(height: 5),
+            Text(label),
+          ],
+        ),
       );
     }
+
 
     /// Widget untuk Menampilkan Toko Rekomendasi
     Widget _buildStoreItem(String name, String location, double rating) {
