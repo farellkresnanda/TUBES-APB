@@ -13,6 +13,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _supabase = Supabase.instance.client;
 
   String _hashPassword(String password) {
@@ -31,6 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'id': _supabase.auth.currentUser!.id,
           'email': _emailController.text,
           'password': _hashPassword(_passwordController.text),
+          'username': _usernameController.text,
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registrasi berhasil!')),
@@ -80,6 +82,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
+                  TextField(
+                    controller: _usernameController,
+                    decoration: InputDecoration(
+                      labelText: 'Username',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
