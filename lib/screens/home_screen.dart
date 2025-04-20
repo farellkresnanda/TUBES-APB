@@ -8,7 +8,7 @@ import 'package:tubes_1/screens/bangunan_screen.dart';
 import 'package:tubes_1/screens/kelistrikan_screen.dart';
 import 'package:tubes_1/screens/air_screen.dart';
 import 'cart_screen.dart';
-import 'package:tubes_1/screens/message_screen.dart';
+import 'package:tubes_1/screens/ChatSection/ChatListScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onProfileMenu: _buildProfileMenu,
       ),
       const CartScreen(),
-      const MessageScreen(),
+      const ChatListScreen(),
     ];
 
     return Scaffold(
