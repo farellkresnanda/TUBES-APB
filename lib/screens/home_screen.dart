@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'profile_screen.dart';
-import 'history_screen.dart';
-import 'settings_screen.dart';
+import 'profile/profile_screen.dart';
+import 'profile/history_screen.dart';
+import 'profile/settings_screen.dart';
 import 'package:tubes_1/screens/login_screen.dart';
 import 'package:tubes_1/screens/Bangunan/bangunan_screen.dart';
 import 'package:tubes_1/screens/Kelistrikan/kelistrikan_screen.dart';
@@ -30,11 +30,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> fetchUsername() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
-      final response = await Supabase.instance.client
-          .from('users')
-          .select('username')
-          .eq('id', user.id)
-          .single();
+      final response =
+          await Supabase.instance.client
+              .from('users')
+              .select('username')
+              .eq('id', user.id)
+              .single();
 
       setState(() {
         username = response['username'];
@@ -64,7 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Keranjang'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Keranjang',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Pesan'),
         ],
       ),
@@ -81,39 +85,73 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: Colors.grey,
               child: Icon(Icons.person, color: Colors.white),
             );
-          } else if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+          } else if (snapshot.hasError ||
+              !snapshot.hasData ||
+              snapshot.data == null) {
             return const CircleAvatar(
               backgroundColor: Colors.black,
               child: Icon(Icons.person, color: Colors.white),
             );
           } else {
-            return CircleAvatar(
-              backgroundImage: NetworkImage(snapshot.data!),
-            );
+            return CircleAvatar(backgroundImage: NetworkImage(snapshot.data!));
           }
         },
       ),
       onSelected: (String value) async {
         if (value == 'profile') {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ProfileScreen()),
+          );
         } else if (value == 'history') {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryScreen()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const HistoryScreen()),
+          );
         } else if (value == 'settings') {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SettingsScreen()),
+          );
         } else if (value == 'logout') {
           await Supabase.instance.client.auth.signOut();
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const LoginScreen()),
-                (route) => false,
+            (route) => false,
           );
         }
       },
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        const PopupMenuItem(value: 'profile', child: ListTile(leading: Icon(Icons.person), title: Text('Profil'))),
-        const PopupMenuItem(value: 'history', child: ListTile(leading: Icon(Icons.history), title: Text('Riwayat'))),
-        const PopupMenuItem(value: 'settings', child: ListTile(leading: Icon(Icons.settings), title: Text('Pengaturan'))),
-        const PopupMenuItem(value: 'logout', child: ListTile(leading: Icon(Icons.logout), title: Text('Log Out'))),
-      ],
+      itemBuilder:
+          (BuildContext context) => <PopupMenuEntry<String>>[
+            const PopupMenuItem(
+              value: 'profile',
+              child: ListTile(
+                leading: Icon(Icons.person),
+                title: Text('Profil'),
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'history',
+              child: ListTile(
+                leading: Icon(Icons.history),
+                title: Text('Riwayat'),
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'settings',
+              child: ListTile(
+                leading: Icon(Icons.settings),
+                title: Text('Pengaturan'),
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'logout',
+              child: ListTile(
+                leading: Icon(Icons.logout),
+                title: Text('Log Out'),
+              ),
+            ),
+          ],
     );
   }
 
@@ -121,11 +159,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (userId == null) return null;
 
-    final response = await Supabase.instance.client
-        .from('users')
-        .select('profile_picture')
-        .eq('id', userId)
-        .single();
+    final response =
+        await Supabase.instance.client
+            .from('users')
+            .select('profile_picture')
+            .eq('id', userId)
+            .single();
 
     return response['profile_picture'];
   }
@@ -135,7 +174,11 @@ class HomeScreenContent extends StatelessWidget {
   final String username;
   final Widget Function(BuildContext) onProfileMenu;
 
-  const HomeScreenContent({super.key, required this.username, required this.onProfileMenu});
+  const HomeScreenContent({
+    super.key,
+    required this.username,
+    required this.onProfileMenu,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +198,10 @@ class HomeScreenContent extends StatelessWidget {
                 width: double.infinity,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 50,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -185,28 +231,58 @@ class HomeScreenContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Hai, $username!', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Text(
+                  'Hai, $username!',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 5),
-                const Text('Ayo pilih kebutuhan tukangmu', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Ayo pilih kebutuhan tukangmu',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _buildCategoryItem(Icons.home, 'Bangunan', () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const BangunanScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const BangunanScreen(),
+                        ),
+                      );
                     }),
-                    _buildCategoryItem(Icons.electrical_services, 'Kelistrikan', () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const KelistrikanScreen()));
-                    }),
+                    _buildCategoryItem(
+                      Icons.electrical_services,
+                      'Kelistrikan',
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const KelistrikanScreen(),
+                          ),
+                        );
+                      },
+                    ),
                     _buildCategoryItem(Icons.water_drop, 'Air', () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AirScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AirScreen()),
+                      );
                     }),
                   ],
                 ),
                 const SizedBox(height: 20),
                 const Text(
                   'Toko Rekomendasi MinKang',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 SingleChildScrollView(
@@ -221,53 +297,55 @@ class HomeScreenContent extends StatelessWidget {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
   Widget _buildCategoryItem(IconData icon, String label, VoidCallback onTap) {
-  return StatefulBuilder(
-    builder: (context, setState) {
-      bool isHovered = false;
+    return StatefulBuilder(
+      builder: (context, setState) {
+        bool isHovered = false;
 
-      return MouseRegion(
-        onEnter: (_) => setState(() => isHovered = true),
-        onExit: (_) => setState(() => isHovered = false),
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: onTap,
-          child: Column(
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isHovered ? Colors.purple.shade300 : Colors.purple.shade100,
+        return MouseRegion(
+          onEnter: (_) => setState(() => isHovered = true),
+          onExit: (_) => setState(() => isHovered = false),
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: onTap,
+            child: Column(
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color:
+                        isHovered
+                            ? Colors.purple.shade300
+                            : Colors.purple.shade100,
+                  ),
+                  padding: const EdgeInsets.all(15),
+                  child: Icon(
+                    icon,
+                    color: isHovered ? Colors.white : Colors.purple,
+                  ),
                 ),
-                padding: const EdgeInsets.all(15),
-                child: Icon(
-                  icon,
-                  color: isHovered ? Colors.white : Colors.purple,
+                const SizedBox(height: 5),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isHovered ? Colors.purple : Colors.black,
+                    fontWeight: isHovered ? FontWeight.bold : FontWeight.normal,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isHovered ? Colors.purple : Colors.black,
-                  fontWeight: isHovered ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
-
+        );
+      },
+    );
+  }
 
   Widget _buildStoreItem(String name, String location, double rating) {
     return Container(
@@ -297,4 +375,3 @@ class HomeScreenContent extends StatelessWidget {
     );
   }
 }
-
