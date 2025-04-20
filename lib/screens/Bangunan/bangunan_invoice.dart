@@ -97,9 +97,13 @@ class InvoiceScreenBangunan extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HomeScreen()),
-                );
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const HomeScreen(
+                        successMessage: "Tukang Berhasil Dipesan",
+                      ),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
