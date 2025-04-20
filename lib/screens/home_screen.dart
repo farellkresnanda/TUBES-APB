@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tubes_1/screens/rating_dialog.dart';
 import 'profile_screen.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
@@ -11,7 +12,9 @@ import 'cart_screen.dart';
 import 'package:tubes_1/screens/ChatSection/ChatListScreen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String? successMessage;
+
+  const HomeScreen({super.key, this.successMessage});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -21,11 +24,41 @@ class _HomeScreenState extends State<HomeScreen> {
   String? username;
   int _selectedIndex = 0;
 
-  @override
+ @override
   void initState() {
     super.initState();
     fetchUsername();
+
+    if (widget.successMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(widget.successMessage!),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      });
+      Future.delayed(const Duration(seconds: 3), () {
+       showDialog(
+          context: context,
+          builder: (context) => RatingDialog(
+            onRated: (rating) {
+              print("User memberi rating: $rating");
+              // Bisa simpan ke database, Firebase, dsb.
+            },
+          ),
+        );
+      });
+    }
   }
+
+
 
   Future<void> fetchUsername() async {
     final user = Supabase.instance.client.auth.currentUser;
