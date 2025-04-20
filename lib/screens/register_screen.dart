@@ -16,6 +16,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _usernameController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _supabase = Supabase.instance.client;
   bool _agreeToTerms = false;
 
@@ -53,6 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'password': _hashPassword(_passwordController.text),
           'username': _usernameController.text,
           'full_name': '${_firstNameController.text} ${_lastNameController.text}',
+          'phone_number': _phoneController.text,
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registrasi berhasil!')),
@@ -132,6 +134,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
+                  ),            
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _phoneController,
+                    decoration: InputDecoration(
+                      labelText: 'Phone Number',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   TextField(
@@ -154,7 +166,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     obscureText: true,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Checkbox(
