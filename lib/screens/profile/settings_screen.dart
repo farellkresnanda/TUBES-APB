@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tubes_1/screens/HelpScreen.dart';
 // import 'notifikasi_screen.dart';
 import '../../theme_notifier.dart';
+
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -67,7 +69,12 @@ class SettingsScreen extends StatelessWidget {
           _buildMenuItem(
             icon: Icons.help_outline,
             title: 'Bantuan',
-            onTap: () {},
+            onTap: ()  {
+              Navigator.push(context, 
+              MaterialPageRoute(
+                builder: (context) => const HelpScreen(),
+              ));
+            },
           ),
           _buildMenuItem(
             icon: Icons.info_outline,
