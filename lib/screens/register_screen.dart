@@ -11,16 +11,35 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _usernameController = TextEditingController();
   final _supabase = Supabase.instance.client;
+  bool _agreeToTerms = false;
 
   String _hashPassword(String password) {
     return sha256.convert(utf8.encode(password)).toString();
   }
 
   Future<void> _register() async {
+    if (_firstNameController.text.isEmpty ||
+        _lastNameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _usernameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Semua field harus diisi!')),
+      );
+      return;
+    }
+    if (!_agreeToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Anda harus menyetujui syarat dan ketentuan!')),
+      );
+      return;
+    }
     try {
       final response = await _supabase.auth.signUp(
         email: _emailController.text,
@@ -33,12 +52,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'email': _emailController.text,
           'password': _hashPassword(_passwordController.text),
           'username': _usernameController.text,
+          'full_name': '${_firstNameController.text} ${_lastNameController.text}',
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registrasi berhasil!')),
         );
         Navigator.pop(context);
       }
+      
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Registrasi gagal: $e')),
@@ -82,6 +103,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
+                  
+                  TextField(
+                    controller: _firstNameController,
+                    decoration: InputDecoration(
+                      labelText: 'First Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _lastNameController,
+                    decoration: InputDecoration(
+                      labelText: 'Last Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: _usernameController,
                     decoration: InputDecoration(
@@ -113,6 +155,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     obscureText: true,
                   ),
                   const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _agreeToTerms,
+                        onChanged: (value) {
+                          setState(() {
+                            _agreeToTerms = value ?? false;
+                          });
+                        },
+                      ),
+                      const Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            text: 'Saya setuju dengan syarat dan ketentuan yang berlaku.',
+                            style: const TextStyle(fontSize: 12),
+                            children: [
+                              TextSpan(
+                                text: 'Syarat dan Ketentuan',
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                              const TextSpan(text: ' dan '),
+                              TextSpan(
+                                text: 'Kebijakan Privasi',
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ]
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: _register,
                     style: ElevatedButton.styleFrom(
