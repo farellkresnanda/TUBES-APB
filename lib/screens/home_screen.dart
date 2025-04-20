@@ -221,10 +221,14 @@ class HomeScreenContent extends StatelessWidget {
           Stack(
             children: [
               Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/Background_1.png'),
-                    fit: BoxFit.cover,
+                    image: AssetImage(
+                      Theme.of(context).brightness == Brightness.light
+                          ? 'assets/Background_1.png'
+                          : 'assets/Background_2.png',
+                      ),
+                      fit: BoxFit.cover,
                   ),
                 ),
                 height: 250,
