@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'MessageScreen.dart';
-import 'HelpScreen.dart';
+import '../HelpScreen.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});

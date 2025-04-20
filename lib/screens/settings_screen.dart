@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme_notifier.dart';
+import 'HelpScreen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -54,7 +55,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PusatBantuanPage()),
+                  MaterialPageRoute(builder: (context) => const HelpScreen()),
                 );
               },
             ),
@@ -77,27 +78,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         value: value,
         secondary: Icon(icon, color: Colors.deepPurple),
         onChanged: onChanged,
-      ),
-    );
-  }
-}
-
-class PusatBantuanPage extends StatelessWidget {
-  const PusatBantuanPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Pusat Bantuan")),
-      body: const Center(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text(
-            "Jika Anda mengalami kendala, silakan hubungi kami di support.tukangku@gmail.com",
-            style: TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-        ),
       ),
     );
   }
