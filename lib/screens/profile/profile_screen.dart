@@ -27,11 +27,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final user = _supabase.auth.currentUser;
       if (user != null) {
-        final response = await _supabase
-            .from('users')
-            .select('profile_picture')
-            .eq('id', user.id)
-            .single();
+        final response =
+            await _supabase
+                .from('users')
+                .select('profile_picture')
+                .eq('id', user.id)
+                .single();
 
         if (mounted) {
           setState(() {
@@ -56,31 +57,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final fileName = '${user.id}_${basename(pickedFile.path)}';
     final filePath = 'profilepictures/$fileName';
 
-    final contentType = lookupMimeType(pickedFile.path) ?? 'application/octet-stream';
+    final contentType =
+        lookupMimeType(pickedFile.path) ?? 'application/octet-stream';
 
     try {
       setState(() {
         _isUploading = true;
       });
 
-      await _supabase.storage.from('profilepictures').uploadBinary(
-        filePath,
-        fileBytes,
-        fileOptions: FileOptions(
-          upsert: true,
-          contentType: contentType,
-        ),
-      );
+      await _supabase.storage
+          .from('profilepictures')
+          .uploadBinary(
+            filePath,
+            fileBytes,
+            fileOptions: FileOptions(upsert: true, contentType: contentType),
+          );
 
-      final imageUrl = _supabase.storage.from('profilepictures').getPublicUrl(filePath);
+      final imageUrl = _supabase.storage
+          .from('profilepictures')
+          .getPublicUrl(filePath);
 
       await _supabase
           .from('users')
-          .update({'profile_picture': imageUrl}).eq('id', user.id);
+          .update({'profile_picture': imageUrl})
+          .eq('id', user.id);
 
       if (mounted) {
         setState(() {
-          _profileImageUrl = imageUrl; // opsional: tambah '?v=${DateTime.now().millisecondsSinceEpoch}' untuk cache bust
+          _profileImageUrl =
+              imageUrl; // opsional: tambah '?v=${DateTime.now().millisecondsSinceEpoch}' untuk cache bust
           _isUploading = false;
         });
 
@@ -92,9 +97,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() => _isUploading = false);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal mengunggah gambar: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal mengunggah gambar: $e')));
       }
     }
   }
@@ -110,15 +115,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _isUploading
                 ? const CircularProgressIndicator()
                 : CircleAvatar(
-                    radius: 50,
-                    backgroundImage: _profileImageUrl != null
-                        ? NetworkImage(_profileImageUrl!)
-                        : const AssetImage('assets/default_profile.png')
-                            as ImageProvider,
-                  ),
+                  radius: 50,
+                  backgroundImage:
+                      _profileImageUrl != null
+                          ? NetworkImage(_profileImageUrl!)
+                          : const AssetImage('assets/default_profile.png')
+                              as ImageProvider,
+                ),
             const SizedBox(height: 10),
             ElevatedButton(
-              onPressed: _isUploading ? null : () => _pickAndUploadImage(context),
+              onPressed:
+                  _isUploading ? null : () => _pickAndUploadImage(context),
               child: const Text('Ubah Foto Profil'),
             ),
           ],
