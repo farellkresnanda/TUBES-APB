@@ -4,11 +4,11 @@ import 'profile_screen.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
 import 'package:tubes_1/screens/login_screen.dart';
-import 'package:tubes_1/screens/bangunan_screen.dart';
-import 'package:tubes_1/screens/kelistrikan_screen.dart';
-import 'package:tubes_1/screens/air_screen.dart';
+import 'package:tubes_1/screens/Bangunan/bangunan_screen.dart';
+import 'package:tubes_1/screens/Kelistrikan/kelistrikan_screen.dart';
+import 'package:tubes_1/screens/Air/air_screen.dart';
 import 'cart_screen.dart';
-import 'package:tubes_1/screens/message_screen.dart';
+import 'package:tubes_1/screens/ChatSection/ChatListScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onProfileMenu: _buildProfileMenu,
       ),
       const CartScreen(),
-      const MessageScreen(),
+      const ChatListScreen(),
     ];
 
     return Scaffold(
@@ -232,21 +232,46 @@ class HomeScreenContent extends StatelessWidget {
   }
 
   Widget _buildCategoryItem(IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.purple.shade100,
-            child: Icon(icon, color: Colors.purple),
+  return StatefulBuilder(
+    builder: (context, setState) {
+      bool isHovered = false;
+
+      return MouseRegion(
+        onEnter: (_) => setState(() => isHovered = true),
+        onExit: (_) => setState(() => isHovered = false),
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Column(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isHovered ? Colors.purple.shade300 : Colors.purple.shade100,
+                ),
+                padding: const EdgeInsets.all(15),
+                child: Icon(
+                  icon,
+                  color: isHovered ? Colors.white : Colors.purple,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isHovered ? Colors.purple : Colors.black,
+                  fontWeight: isHovered ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 5),
-          Text(label),
-        ],
-      ),
-    );
-  }
+        ),
+      );
+    },
+  );
+}
+
 
   Widget _buildStoreItem(String name, String location, double rating) {
     return Container(
