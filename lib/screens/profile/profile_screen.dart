@@ -264,7 +264,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             isEditable: false,
                           ),
                           _buildInfoField(
-                            label: "Phone Number",
+                            label: "Phone",
                             controller: _phoneController,
                             icon: Icons.phone,
                             isEditable: _isEditing,
