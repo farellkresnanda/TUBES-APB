@@ -238,7 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               horizontal: 30, vertical: 12),
                         ),
                         onPressed: _deleteImage,
-                        child: const Text("Remove Photo"),
+                        child: const Text("Hapus Foto Profil"),
                       ),
                     const SizedBox(height: 30),
                     Form(
