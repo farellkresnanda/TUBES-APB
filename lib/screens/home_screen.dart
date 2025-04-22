@@ -132,10 +132,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       onSelected: (String value) async {
         if (value == 'profile') {
-          Navigator.push(
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const ProfileScreen()),
           );
+          fetchUsername();
         } else if (value == 'history') {
           Navigator.push(
             context,

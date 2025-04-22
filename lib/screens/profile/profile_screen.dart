@@ -11,6 +11,9 @@ const Color lightYellow = Color(0xFFFFE39C);
 const Color cream = Color(0xFFFFECBA);
 const Color white = Color(0xFFFFFFFF);
 const Color darkText = Color(0xFF333333);
+const Color lightText = Color(0xFF666666);
+const Color red = Color(0xFFFF0000);
+const Color dark = Color(0xFF000000);
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -112,15 +115,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             fileOptions: const FileOptions(upsert: true),
           );
       await _loadImageUrl();
-
-      final userId = supabase.auth.currentUser?.id;
-      if (userId != null) {
-        await supabase.from('users').update({
-          'profile_picture': fileName,
-          'updated_at': DateTime.now().toIso8601String(),
-        }).eq('id', userId);
-      }
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile picture updated successfully")),
       );
@@ -182,6 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: white,
       appBar: AppBar(
         title: const Text('Profile', style: TextStyle(color: darkText)),
         backgroundColor: primaryYellow,
@@ -211,7 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: primaryYellow,
+                              color: darkText,
                               width: 3,
                             ),
                           ),
@@ -231,8 +226,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           right: 0,
                           child: FloatingActionButton.small(
                             onPressed: _pickImage,
-                            backgroundColor: primaryYellow,
-                            child: const Icon(Icons.camera_alt, size: 20, color: darkText),
+                            backgroundColor: darkText,
+                            child: const Icon(Icons.camera_alt, size: 20, color: secondaryYellow),
                           ),
                         ),
                       ],
@@ -241,8 +236,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     if (imageUrl != null)
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: secondaryYellow,
-                          foregroundColor: darkText,
+                          backgroundColor: red,
+                          foregroundColor: white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 30, vertical: 12),
                         ),
@@ -349,8 +344,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(color: secondaryYellow),
           ),
-          filled: !isEditable,
-          fillColor: cream,
+          fillColor: isEditable ? cream : white,
+
           contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         ),
         style: TextStyle(color: darkText),
