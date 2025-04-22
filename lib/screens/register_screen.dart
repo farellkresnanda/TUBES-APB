@@ -54,7 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'password': _hashPassword(_passwordController.text),
           'username': _usernameController.text,
           'full_name': '${_firstNameController.text} ${_lastNameController.text}',
-          'phone_number': _phoneController.text,
+          'phone': _phoneController.text,
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registrasi berhasil!')),

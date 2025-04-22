@@ -12,7 +12,6 @@ import 'cart_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:tubes_1/screens/ChatSection/ChatListScreen.dart';
 
-
 class HomeScreen extends StatefulWidget {
   final String? successMessage;
 
@@ -59,7 +58,6 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-
 
 
   Future<void> fetchUsername() async {
@@ -200,8 +198,22 @@ class _HomeScreenState extends State<HomeScreen> {
             .select('profile_picture')
             .eq('id', userId)
             .single();
+    
+    final fileName = response['profile_picture'] as String?;
+    if (fileName == null) return null;
+    
+    final String url = Supabase.instance.client.storage.from('profilepictures').getPublicUrl(fileName);
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    return '$url?ts=$timestamp';
+  }
 
-    return response['profile_picture'];
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    ModalRoute.of(context)?.addScopedWillPopCallback(() {
+    if (mounted) setState(() {});
+    return Future.value(true);
+    });
   }
 }
 

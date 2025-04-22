@@ -13,6 +13,10 @@ flutter:
       - assets/logo.png
       - assets/Background_1.png
       - assets/Background_2.png
+      - assets/sinar_saluyu.jpg
+      - assets/surya_jaya.jpg
+      - assets/laksana_jaya.jpg
+
 
 dependencies:
   flutter:

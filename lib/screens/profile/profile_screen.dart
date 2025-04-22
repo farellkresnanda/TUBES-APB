@@ -112,6 +112,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             fileOptions: const FileOptions(upsert: true),
           );
       await _loadImageUrl();
+
+      final userId = supabase.auth.currentUser?.id;
+      if (userId != null) {
+        await supabase.from('users').update({
+          'profile_picture': fileName,
+          'updated_at': DateTime.now().toIso8601String(),
+        }).eq('id', userId);
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile picture updated successfully")),
       );
