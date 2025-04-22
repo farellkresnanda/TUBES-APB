@@ -9,7 +9,9 @@ import 'package:tubes_1/screens/Bangunan/bangunan_screen.dart';
 import 'package:tubes_1/screens/Kelistrikan/kelistrikan_screen.dart';
 import 'package:tubes_1/screens/Air/air_screen.dart';
 import 'cart_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:tubes_1/screens/ChatSection/ChatListScreen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   final String? successMessage;
@@ -224,11 +226,13 @@ class HomeScreenContent extends StatelessWidget {
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage(
-                      Theme.of(context).brightness == Brightness.light
+                      Theme
+                          .of(context)
+                          .brightness == Brightness.light
                           ? 'assets/Background_1.png'
                           : 'assets/Background_2.png',
-                      ),
-                      fit: BoxFit.cover,
+                    ),
+                    fit: BoxFit.cover,
                   ),
                 ),
                 height: 250,
@@ -295,7 +299,7 @@ class HomeScreenContent extends StatelessWidget {
                     _buildCategoryItem(
                       Icons.electrical_services,
                       'Kelistrikan',
-                      () {
+                          () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -326,9 +330,27 @@ class HomeScreenContent extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      _buildStoreItem('TB. Berkah Jaya', 'Bojongsoang', 5.0),
-                      _buildStoreItem('TB. Mekar Abadi', 'Ciwastra', 4.8),
-                      _buildStoreItem('TB. Jaya Abadi', 'Balenda', 4.5),
+                    _buildStoreItem(
+                    'TB. Sinar Saluyu Putra SSP',
+                    'Bojongsoang',
+                    5.0,
+                    'TB. Sinar Saluyu Putra SSP Bojongsoang',
+                    'assets/sinar_saluyu.jpg',
+                  ),
+                  _buildStoreItem(
+                    'TB. Surya Jaya Putra',
+                    'Bojongsoang',
+                    4.7,
+                    'Tb Surya Jaya Putra Bojongsoang',
+                    'assets/surya_jaya.jpg',
+                  ),
+                  _buildStoreItem(
+                    'TB. Laksana Jaya',
+                    'Sukapura',
+                    4.3,
+                    'TB. Laksana Jaya Bojongsoang',
+                    'assets/laksana_jaya.jpg',
+                    ),
                     ],
                   ),
                 ),
@@ -358,9 +380,9 @@ class HomeScreenContent extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color:
-                        isHovered
-                            ? Colors.purple.shade300
-                            : Colors.purple.shade100,
+                    isHovered
+                        ? Colors.purple.shade300
+                        : Colors.purple.shade100,
                   ),
                   padding: const EdgeInsets.all(15),
                   child: Icon(
@@ -384,31 +406,55 @@ class HomeScreenContent extends StatelessWidget {
     );
   }
 
-  Widget _buildStoreItem(String name, String location, double rating) {
-    return Container(
-      width: 150,
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(height: 80, color: Colors.grey),
-          const SizedBox(height: 5),
-          Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(location, style: const TextStyle(color: Colors.grey)),
-          Row(
-            children: [
-              const Icon(Icons.star, color: Colors.orange, size: 16),
-              Text(rating.toString()),
-            ],
-          ),
-        ],
+  Widget _buildStoreItem(String name, String location, double rating, String mapsQuery, String imagePath) {
+    return GestureDetector(
+      onTap: () => _launchMaps(mapsQuery),
+      child: Container(
+        width: 150,
+        height: 185,
+        margin: const EdgeInsets.only(right: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 80,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                image: DecorationImage(
+                  image: AssetImage(imagePath),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(location, style: const TextStyle(color: Colors.grey)),
+            Row(
+              children: [
+                const Icon(Icons.star, color: Colors.orange, size: 16),
+                Text(rating.toString()),
+              ],
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+
+  void _launchMaps(String query) async {
+    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(query)}');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Tidak bisa membuka Google Maps untuk: $query';
+    }
   }
 }
