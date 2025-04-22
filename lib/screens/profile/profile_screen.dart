@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
@@ -35,6 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  
 
   @override
   void initState() {
@@ -50,8 +52,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final userId = supabase.auth.currentUser?.id;
       if (userId != null) {
-        final response =
-            await supabase.from('users').select().eq('id', userId).single();
+        final response = await supabase
+            .from('users')
+            .select()
+            .eq('id', userId)
+            .single();
         setState(() {
           userData = response;
           _usernameController.text = response['username'] ?? '';
@@ -61,9 +66,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error loading user data: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error loading user data: $e")),
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -80,9 +85,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
+    final picked = await picker.pickImage(source: source);
 
     if (picked != null) {
       final bytes = await picked.readAsBytes();
@@ -96,29 +101,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
           quality: 70,
         );
       }
-
       await _uploadImage(uploadData);
     }
   }
 
+  void _showPickImageDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Ambil dari Kamera'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Pilih dari Galeri'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   Future<void> _uploadImage(Uint8List bytes) async {
     setState(() => _isLoading = true);
     try {
-      await supabase.storage
-          .from(bucketName)
-          .uploadBinary(
+      await supabase.storage.from(bucketName).uploadBinary(
             fileName,
             bytes,
             fileOptions: const FileOptions(upsert: true),
           );
+      final userId = supabase.auth.currentUser?.id;
+      if (userId != null) {
+        await supabase.from('users').update({
+          'profile_picture': fileName,
+          'updated_at': DateTime.now().toIso8601String(),
+        }).eq('id', userId);
+      }
       await _loadImageUrl();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile picture updated successfully")),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Upload failed: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Upload failed: $e")),
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -129,13 +171,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await supabase.storage.from(bucketName).remove([fileName]);
       setState(() => imageUrl = null);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Profile picture removed")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Profile picture removed")),
+      );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Delete failed: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Delete failed: $e")),
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -148,15 +190,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final userId = supabase.auth.currentUser?.id;
       if (userId != null) {
-        await supabase
-            .from('users')
-            .update({
-              'username': _usernameController.text,
-              'full_name': _fullNameController.text,
-              'phone': _phoneController.text,
-              'updated_at': DateTime.now().toIso8601String(),
-            })
-            .eq('id', userId);
+        await supabase.from('users').update({
+          'username': _usernameController.text,
+          'full_name': _fullNameController.text,
+          'phone': _phoneController.text,
+          'updated_at': DateTime.now().toIso8601String(),
+        }).eq('id', userId);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Profile updated successfully")),
@@ -165,9 +204,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         await _loadUserData();
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Update failed: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Update failed: $e")),
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -190,146 +229,134 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
         ],
       ),
-      body:
-          _isLoading
-              ? Center(child: CircularProgressIndicator(color: primaryYellow))
-              : Container(
-                color: white,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Stack(
-                        alignment: Alignment.bottomRight,
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator(color: primaryYellow))
+          : Container(
+              color: white,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: darkText,
+                              width: 3,
+                            ),
+                          ),
+                          child: CircleAvatar(
+                            radius: 70,
+                            backgroundColor: cream,
+                            backgroundImage:
+                                imageUrl != null ? NetworkImage(imageUrl!) : null,
+                            child: imageUrl == null
+                                ? Icon(Icons.person,
+                                    size: 70, color: darkText.withOpacity(0.5))
+                                : null,
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: FloatingActionButton.small(
+                            onPressed: () => _showPickImageDialog(context),
+                            backgroundColor: darkText,
+                            child: const Icon(Icons.camera_alt, size: 20, color: secondaryYellow),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    if (imageUrl != null)
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: red,
+                          foregroundColor: white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 12),
+                        ),
+                        onPressed: _deleteImage,
+                        child: const Text("Hapus Foto Profil"),
+                      ),
+                    const SizedBox(height: 30),
+                    Form(
+                      key: _formKey,
+                      child: Column(
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: darkText, width: 3),
-                            ),
-                            child: CircleAvatar(
-                              radius: 70,
-                              backgroundColor: cream,
-                              backgroundImage:
-                                  imageUrl != null
-                                      ? NetworkImage(imageUrl!)
-                                      : null,
-                              child:
-                                  imageUrl == null
-                                      ? Icon(
-                                        Icons.person,
-                                        size: 70,
-                                        color: darkText.withOpacity(0.5),
-                                      )
-                                      : null,
-                            ),
+                          _buildInfoField(
+                            label: "Username",
+                            controller: _usernameController,
+                            icon: Icons.person,
+                            isEditable: _isEditing,
                           ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: FloatingActionButton.small(
-                              onPressed: _pickImage,
-                              backgroundColor: darkText,
-                              child: const Icon(
-                                Icons.camera_alt,
-                                size: 20,
-                                color: secondaryYellow,
-                              ),
-                            ),
+                          _buildInfoField(
+                            label: "Full Name",
+                            controller: _fullNameController,
+                            icon: Icons.badge,
+                            isEditable: _isEditing,
                           ),
+                          _buildInfoField(
+                            label: "Email",
+                            controller: _emailController,
+                            icon: Icons.email,
+                            isEditable: false,
+                          ),
+                          _buildInfoField(
+                            label: "Phone",
+                            controller: _phoneController,
+                            icon: Icons.phone,
+                            isEditable: _isEditing,
+                            keyboardType: TextInputType.phone,
+                          ),
+                          if (_isEditing) ...[
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: _updateProfile,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: primaryYellow,
+                                    foregroundColor: darkText,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 30, vertical: 12),
+                                  ),
+                                  child: const Text("Save Changes"),
+                                ),
+                                const SizedBox(width: 15),
+                                TextButton(
+                                  onPressed: () {
+                                    _formKey.currentState!.reset();
+                                    setState(() => _isEditing = false);
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: darkText,
+                                  ),
+                                  child: const Text("Cancel"),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      if (imageUrl != null)
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: red,
-                            foregroundColor: white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 30,
-                              vertical: 12,
-                            ),
-                          ),
-                          onPressed: _deleteImage,
-                          child: const Text("Hapus Foto Profil"),
-                        ),
-                      const SizedBox(height: 30),
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            _buildInfoField(
-                              label: "Username",
-                              controller: _usernameController,
-                              icon: Icons.person,
-                              isEditable: _isEditing,
-                            ),
-                            _buildInfoField(
-                              label: "Full Name",
-                              controller: _fullNameController,
-                              icon: Icons.badge,
-                              isEditable: _isEditing,
-                            ),
-                            _buildInfoField(
-                              label: "Email",
-                              controller: _emailController,
-                              icon: Icons.email,
-                              isEditable: false,
-                            ),
-                            _buildInfoField(
-                              label: "Phone",
-                              controller: _phoneController,
-                              icon: Icons.phone,
-                              isEditable: _isEditing,
-                              keyboardType: TextInputType.phone,
-                            ),
-                            if (_isEditing) ...[
-                              const SizedBox(height: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: _updateProfile,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: primaryYellow,
-                                      foregroundColor: darkText,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 30,
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                    child: const Text("Save Changes"),
-                                  ),
-                                  const SizedBox(width: 15),
-                                  TextButton(
-                                    onPressed: () {
-                                      _formKey.currentState!.reset();
-                                      setState(() => _isEditing = false);
-                                    },
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: darkText,
-                                    ),
-                                    child: const Text("Cancel"),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ],
-                        ),
+                    ),
+                    const SizedBox(height: 30),
+                    Text(
+                      "Member since ${userData?['created_at'] != null ? DateTime.parse(userData!['created_at']).toLocal().toString().split(' ')[0] : '--'}",
+                      style: TextStyle(
+                        color: darkText.withOpacity(0.7),
+                        fontStyle: FontStyle.italic,
                       ),
-                      const SizedBox(height: 30),
-                      Text(
-                        "Member since ${userData?['created_at'] != null ? DateTime.parse(userData!['created_at']).toLocal().toString().split(' ')[0] : '--'}",
-                        style: TextStyle(
-                          color: darkText.withOpacity(0.7),
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
+            ),
     );
   }
 
@@ -358,10 +385,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           fillColor: isEditable ? cream : white,
 
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 15,
-            horizontal: 20,
-          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         ),
         style: TextStyle(color: darkText),
         readOnly: !isEditable,
