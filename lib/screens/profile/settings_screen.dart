@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:tubes_1/screens/HelpScreen.dart';
 // import 'notifikasi_screen.dart';
 import '../../theme_notifier.dart';
-
+import 'package:tubes_1/screens/profile/profile_screen.dart';
+import 'package:tubes_1/screens/profile/payment_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -11,16 +12,18 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Settings'), centerTitle: true),
       body: Column(
         children: [
           _buildMenuItem(
             icon: Icons.person_outline,
             title: 'Akun',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            },
           ),
           _buildMenuItem(
             icon: Icons.notifications_none,
@@ -30,13 +33,21 @@ class SettingsScreen extends StatelessWidget {
           _buildMenuItem(
             icon: Icons.credit_card,
             title: 'Pembayaran',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PaymentMethodsScreen()),
+              );
+            },
           ),
           _buildMenuItem(
             icon: Icons.brightness_4_outlined,
             title: 'Tema',
             onTap: () {
-              final themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
+              final themeNotifier = Provider.of<ThemeNotifier>(
+                context,
+                listen: false,
+              );
               showDialog(
                 context: context,
                 builder: (context) {
@@ -69,11 +80,11 @@ class SettingsScreen extends StatelessWidget {
           _buildMenuItem(
             icon: Icons.help_outline,
             title: 'Bantuan',
-            onTap: ()  {
-              Navigator.push(context, 
-              MaterialPageRoute(
-                builder: (context) => const HelpScreen(),
-              ));
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HelpScreen()),
+              );
             },
           ),
           _buildMenuItem(
@@ -119,7 +130,9 @@ class SettingsScreen extends StatelessWidget {
       title: Text(title),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: onTap,
-      shape: const Border(bottom: BorderSide(width: 0.5, color: Colors.black54)),
+      shape: const Border(
+        bottom: BorderSide(width: 0.5, color: Colors.black54),
+      ),
     );
   }
 }

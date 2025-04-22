@@ -16,6 +16,11 @@ flutter:
       - assets/sinar_saluyu.jpg
       - assets/surya_jaya.jpg
       - assets/laksana_jaya.jpg
+      - assets/linkaja.png
+      - assets/card.png
+      - assets/jago.png
+      - assets/bri.png
+      - assets/blu.png
 
 
 dependencies:

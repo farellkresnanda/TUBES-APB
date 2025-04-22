@@ -30,14 +30,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _emailController.text.isEmpty ||
         _passwordController.text.isEmpty ||
         _usernameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semua field harus diisi!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Semua field harus diisi!')));
       return;
     }
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Anda harus menyetujui syarat dan ketentuan!')),
+        const SnackBar(
+          content: Text('Anda harus menyetujui syarat dan ketentuan!'),
+        ),
       );
       return;
     }
@@ -53,19 +55,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'email': _emailController.text,
           'password': _hashPassword(_passwordController.text),
           'username': _usernameController.text,
-          'full_name': '${_firstNameController.text} ${_lastNameController.text}',
+          'full_name':
+              '${_firstNameController.text} ${_lastNameController.text}',
           'phone': _phoneController.text,
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registrasi berhasil!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Registrasi berhasil!')));
         Navigator.pop(context);
       }
-      
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registrasi gagal: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Registrasi gagal: $e')));
     }
   }
 
@@ -98,14 +100,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 10),
                   const Text(
                     'Mitra Terpercaya Penyedia Tenaga Konstruksi.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.orange,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.orange),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  
+
                   TextField(
                     controller: _firstNameController,
                     decoration: InputDecoration(
@@ -134,7 +133,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                  ),            
+                  ),
                   const SizedBox(height: 10),
                   TextField(
                     controller: _phoneController,
@@ -180,8 +179,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const Expanded(
                         child: Text.rich(
                           TextSpan(
-                            text: 'Saya setuju dengan syarat dan ketentuan yang berlaku.',
-                            style: const TextStyle(fontSize: 12),
+                            text:
+                                'Saya setuju dengan syarat dan ketentuan yang berlaku.',
+                            style: TextStyle(fontSize: 12),
                             children: [
                               TextSpan(
                                 text: 'Syarat dan Ketentuan',
@@ -190,7 +190,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   decoration: TextDecoration.underline,
                                 ),
                               ),
-                              const TextSpan(text: ' dan '),
+                              TextSpan(text: ' dan '),
                               TextSpan(
                                 text: 'Kebijakan Privasi',
                                 style: TextStyle(
@@ -198,7 +198,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   decoration: TextDecoration.underline,
                                 ),
                               ),
-                            ]
+                            ],
                           ),
                         ),
                       ),
@@ -213,18 +213,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       backgroundColor: Colors.grey,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 50, vertical: 12),
+                        horizontal: 50,
+                        vertical: 12,
+                      ),
                     ),
-                    child: const Text('Register',
-                        style: TextStyle(color: Colors.white)),
+                    child: const Text(
+                      'Register',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: const Text('Sudah punya akun? Login di sini',
-                        style: TextStyle(color: Colors.blue)),
+                    child: const Text(
+                      'Sudah punya akun? Login di sini',
+                      style: TextStyle(color: Colors.blue),
+                    ),
                   ),
                 ],
               ),
