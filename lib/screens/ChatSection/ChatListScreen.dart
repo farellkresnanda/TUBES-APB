@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '/screens/HelpScreen.dart'; // Update with your path
 import 'MessageScreen.dart';
-import '../HelpScreen.dart';
+
+const Color primaryYellow = Color(0xFFFFB800);
+const Color secondaryYellow = Color(0xFFFFD976);
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -10,115 +14,155 @@ class ChatListScreen extends StatefulWidget {
 }
 
 class _ChatListScreenState extends State<ChatListScreen> {
-  String selectedFeature = 'Kotak Pesan';
+  final supabase = Supabase.instance.client;
+  List<Map<String, dynamic>> userList = [];
+  bool isLoading = true;
+  String? currentUserRole;
+  String currentUserId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserList();
+  }
+
+  Future<void> fetchUserList() async {
+    try {
+      setState(() => isLoading = true);
+      currentUserId = supabase.auth.currentUser?.id ?? '';
+
+      if (currentUserId.isEmpty) {
+        throw Exception('User not logged in');
+      }
+
+      final userData = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', currentUserId)
+          .maybeSingle();
+
+      final currentRole = (userData?['role'] as String?)?.toLowerCase()?.trim();
+      if (currentRole == null) {
+        throw Exception('Role user tidak ditemukan');
+      }
+
+      currentUserRole = currentRole;
+      final targetRole = currentRole == 'tukang' ? 'pelanggan' : 'tukang';
+
+      final response = await supabase
+          .from('users')
+          .select('id, full_name, phone, role, updated_at')
+          .ilike('role', targetRole)
+          .neq('id', currentUserId);
+
+      setState(() {
+        userList = List<Map<String, dynamic>>.from(response);
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFCF7FF),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 40),
-            const Text(
-              'Pilihan Fitur',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _buildFeatureIcon('Kotak Pesan', Icons.mail, Colors.amber),
-                const SizedBox(width: 20),
-                _buildFeatureIcon('Pusat Bantuan', Icons.help_outline, Colors.greenAccent),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: selectedFeature == 'Kotak Pesan'
-                  ? _buildChatList(context)
-                  : const HelpScreen(),
-            ),
-          ],
-        ),
+      appBar: AppBar(
+        title: const Text('Kotak Pesan'),
+        backgroundColor: primaryYellow,
       ),
-    );
-  }
-
-  Widget _buildFeatureIcon(String label, IconData icon, Color color) {
-    final isSelected = selectedFeature == label;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedFeature = label;
-        });
-      },
-      child: Column(
+      body: Column(
         children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              border: isSelected ? Border.all(color: Colors.black, width: 2) : null,
-            ),
-            child: Icon(icon, color: Colors.black, size: 28),
+          // Pilihan Fitur Section
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.help, color: Colors.green),
+                title: const Text('Bantuan'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HelpScreen()),
+                  );
+                },
+              ),
+              const Divider(height: 1),
+            ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            label == 'Kotak Pesan' ? 'Kotak Pesan' : 'Bantuan',
-            style: const TextStyle(fontSize: 12),
+
+          // Main chat list
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : userList.isEmpty
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.group_off, size: 50, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Tidak ada ${currentUserRole == 'tukang' ? 'Pelanggan' : 'Tukang'} yang tersedia',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            )
+                : ListView.builder(
+              itemCount: userList.length,
+              itemBuilder: (context, index) {
+                final user = userList[index];
+                final lastSeen = user['updated_at'] != null
+                    ? DateTime.parse(user['updated_at']).toLocal()
+                    : null;
+
+                return Column(
+                  children: [
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.grey[300],
+                        child: Text(
+                          user['full_name']?[0] ?? '?',
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                      ),
+                      title: Text(user['full_name'] ?? 'Pengguna'),
+                      subtitle: Text(
+                        user['phone'] ?? 'No telepon tidak tersedia',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      trailing: lastSeen != null
+                          ? Text(
+                        '${lastSeen.hour}:${lastSeen.minute.toString().padLeft(2, '0')}',
+                        style: const TextStyle(fontSize: 12),
+                      )
+                          : null,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MessageScreen(
+                              receiverId: user['id'],
+                              receiverName: user['full_name'] ?? 'Pengguna',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1, indent: 72),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildChatList(BuildContext context) {
-    final List<String> chatNames = List.generate(5, (_) => 'Pak Darsono - Tukang');
-
-    return ListView.builder(
-      itemCount: chatNames.length,
-      itemBuilder: (context, index) {
-        return Column(
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const MessageScreen()),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.account_circle, size: 48),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Pak darsono - Tukang',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                        ),
-                        SizedBox(height: 4),
-                        Text('...', style: TextStyle(fontSize: 12)),
-                        SizedBox(height: 2),
-                        Text('Lokasi', style: TextStyle(fontSize: 12)),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            ),
-            const Divider(height: 1, thickness: 0.5),
-          ],
-        );
-      },
     );
   }
 }
