@@ -5,7 +5,6 @@ import 'package:crypto/crypto.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
-  
 
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -18,8 +17,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _usernameController = TextEditingController();
   final _phoneController = TextEditingController();
-  String? _selectedRole;
-  final List<String> roles = ['Tukang', 'Pelanggan'];
   final _supabase = Supabase.instance.client;
   bool _agreeToTerms = false;
 
@@ -61,7 +58,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'full_name':
               '${_firstNameController.text} ${_lastNameController.text}',
           'phone': _phoneController.text,
-          'role': _selectedRole,
         });
         ScaffoldMessenger.of(
           context,
@@ -133,27 +129,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _usernameController,
                     decoration: InputDecoration(
                       labelText: 'Username',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  DropdownButtonFormField<String>(
-                    value: _selectedRole,
-                    hint: const Text('Pilih Role'),
-                    items: roles.map((String role) {
-                      return DropdownMenuItem<String>(
-                        value: role,
-                        child: Text(role),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedRole = newValue;
-                      });
-                    },
-                    decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
