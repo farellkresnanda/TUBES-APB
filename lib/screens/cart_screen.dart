@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -15,7 +18,7 @@ class _CartScreenState extends State<CartScreen> {
   List<Map<String, String>> cartItems = [
     {
       "title": "Section Air",
-      "subtitle": "Pak darsono - Spesialis pompa air",
+      "subtitle": "Pak Darsono - Spesialis pompa air",
       "price": "Rp.0",
     },
     {
@@ -30,118 +33,152 @@ class _CartScreenState extends State<CartScreen> {
     },
   ];
 
-  void _removeItem(int index) {
-    setState(() {
-      cartItems.removeAt(index);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Item berhasil dihapus'),
-        duration: Duration(seconds: 1),
-      ),
+  late GoogleMapController _controller;
+  late Marker _tukangMarker;
+  late Circle _tukangCircle;
+  LatLng _initialPosition = const LatLng(-6.200000, 106.816666); // Default position
+
+  late SupabaseClient _supabaseClient;
+
+  @override
+  void initState() {
+    super.initState();
+    _supabaseClient = Supabase.instance.client;
+    _tukangMarker = Marker(
+      markerId: const MarkerId('tukang'),
+      position: _initialPosition,
+      infoWindow: const InfoWindow(title: 'Tukang'),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
     );
+    _tukangCircle = Circle(
+      circleId: const CircleId('tukangCircle'),
+      center: _initialPosition,
+      radius: 100.0, // 100 meters radius
+      fillColor: Colors.green.withOpacity(0.3),
+      strokeWidth: 1,
+    );
+    _initializeRealtime();
   }
 
-  void _removeAllItems() {
-    setState(() {
-      cartItems.clear();
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Semua item dihapus'),
-        duration: Duration(seconds: 1),
-      ),
+  // Initialize Realtime Listener using .stream()
+  Future<void> _initializeRealtime() async {
+  // Subscribe to changes in the 'lokasi_tukang' table
+  final subscription = _supabaseClient
+      .from('lokasi_tukang')
+      .stream(primaryKey: ['id']) // Or use the unique primary key of the table
+      .listen((List<Map<String, dynamic>> data) {
+        // Handle the new data here
+        if (data.isNotEmpty) {
+          final newData = data[0]; // Assuming there's one tukang record per row
+          final tukangName = newData['tukang_name'];
+          final latitude = newData['latitude'];
+          final longitude = newData['longitude'];
+
+          setState(() {
+            _tukangMarker = Marker(
+              markerId: const MarkerId('tukang'),
+              position: LatLng(latitude, longitude),
+              infoWindow: InfoWindow(title: tukangName),
+              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+            );
+            _tukangCircle = Circle(
+              circleId: const CircleId('tukangCircle'),
+              center: LatLng(latitude, longitude),
+              radius: 100.0, // 100 meters radius
+              fillColor: Colors.green.withOpacity(0.3),
+              strokeWidth: 1,
+            );
+          });
+        }
+      });
+
+  // Make sure to subscribe to the data stream
+  await subscription;
+}
+
+Future<void> updateTukangLocation(String tukangName, double latitude, double longitude) async {
+  final response = await _supabaseClient
+      .from('lokasi_tukang') // Your Supabase table
+      .upsert({
+        'tukang_name': tukangName,
+        'latitude': latitude,
+        'longitude': longitude,
+        'updated_at': DateTime.now().toIso8601String(),
+      })
+      .eq('tukang_name', tukangName) // Ensure it updates the right tukang by name
+      .select()
+      .single();
+
+  print('Full Response: $response'); // Print the entire response to see the structure
+}
+
+  // Get current location (for demonstration purposes)
+  Future<void> _getCurrentLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
     );
+
+    setState(() {
+      _initialPosition = LatLng(position.latitude, position.longitude);
+    });
+
+    // Update tukang's location to Supabase
+    updateTukangLocation('Tukang XYZ', position.latitude, position.longitude);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'Keranjang Pesanan',
-          style: TextStyle(color: Colors.black),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions:
-            cartItems.isNotEmpty
-                ? [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete_sweep,
-                      color: Colors.redAccent,
-                    ),
-                    tooltip: "Hapus Semua",
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder:
-                            (context) => AlertDialog(
-                              title: const Text("Hapus semua item?"),
-                              content: const Text(
-                                "Apakah kamu yakin ingin menghapus semua item di keranjang?",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("Batal"),
-                                ),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                  ),
-                                  onPressed: () {
-                                    _removeAllItems();
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text("Hapus Semua"),
-                                ),
-                              ],
-                            ),
-                      );
-                    },
-                  ),
-                ]
-                : null,
+        title: const Text('Keranjang Pesanan'),
+        backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child:
-            cartItems.isEmpty
-                ? const Center(
-                  child: Text(
-                    "Keranjang kosong",
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                )
-                : ListView.builder(
-                  itemCount: cartItems.length,
-                  itemBuilder: (context, index) {
-                    final item = cartItems[index];
-                    return Dismissible(
-                      key: Key(item["title"] ?? index.toString()),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        alignment: Alignment.centerRight,
-                        decoration: BoxDecoration(
-                          color: Colors.redAccent,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      onDismissed: (_) => _removeItem(index),
-                      child: _buildCartItem(
-                        title: item["title"] ?? "---",
-                        subtitle: item["subtitle"] ?? "",
-                        price: item["price"] ?? "",
-                        onDelete: () => _removeItem(index),
-                      ),
-                    );
-                  },
+        child: cartItems.isEmpty
+            ? const Center(
+                child: Text(
+                  "Keranjang kosong",
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
+              )
+            : ListView.builder(
+                itemCount: cartItems.length,
+                itemBuilder: (context, index) {
+                  final item = cartItems[index];
+                  return Dismissible(
+                    key: Key(item["title"] ?? index.toString()),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      alignment: Alignment.centerRight,
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    onDismissed: (_) {
+                      _removeItem(index);
+                    },
+                    child: _buildCartItem(
+                      title: item["title"] ?? "---",
+                      subtitle: item["subtitle"] ?? "",
+                      price: item["price"] ?? "",
+                      onDelete: () {
+                        _removeItem(index);
+                      },
+                    ),
+                  );
+                },
+              ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _getCurrentLocation(); // Get and update tukang's location
+        },
+        child: const Icon(Icons.location_on),
+        tooltip: "Update Tukang Location",
       ),
     );
   }
@@ -222,6 +259,18 @@ class _CartScreenState extends State<CartScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _removeItem(int index) {
+    setState(() {
+      cartItems.removeAt(index);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Item berhasil dihapus'),
+        duration: Duration(seconds: 1),
       ),
     );
   }

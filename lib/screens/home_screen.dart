@@ -11,6 +11,7 @@ import 'package:tubes_1/screens/Air/air_screen.dart';
 import 'cart_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:tubes_1/screens/ChatSection/ChatListScreen.dart';
+import 'package:tubes_1/screens/Maps/map_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? successMessage;
@@ -105,6 +106,18 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Pesan'),
         ],
       ),
+    );
+  }
+
+  Widget _buildNavigateToMap(){
+    return IconButton(
+      icon: const Icon(Icons.map, color: Colors.white),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MapScreen()),
+        );
+      },
     );
   }
 
@@ -228,6 +241,7 @@ class HomeScreenContent extends StatelessWidget {
     required this.onProfileMenu,
   });
 
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -297,7 +311,7 @@ class HomeScreenContent extends StatelessWidget {
                   'Ayo pilih kebutuhan tukangmu',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -309,10 +323,7 @@ class HomeScreenContent extends StatelessWidget {
                         ),
                       );
                     }),
-                    _buildCategoryItem(
-                      Icons.electrical_services,
-                      'Kelistrikan',
-                          () {
+                    _buildCategoryItem(Icons.electrical_services, 'Kelistrikan',() {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -330,43 +341,102 @@ class HomeScreenContent extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'Toko Rekomendasi MinKang',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                    _buildStoreItem(
-                    'TB. Sinar Saluyu Putra SSP',
-                    'Bojongsoang',
-                    5.0,
-                    'TB. Sinar Saluyu Putra SSP Bojongsoang',
-                    'assets/sinar_saluyu.jpg',
-                  ),
-                  _buildStoreItem(
-                    'TB. Surya Jaya Putra',
-                    'Bojongsoang',
-                    4.7,
-                    'Tb Surya Jaya Putra Bojongsoang',
-                    'assets/surya_jaya.jpg',
-                  ),
-                  _buildStoreItem(
-                    'TB. Laksana Jaya',
-                    'Sukapura',
-                    4.3,
-                    'TB. Laksana Jaya Bojongsoang',
-                    'assets/laksana_jaya.jpg',
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.yellow.shade300,
+                      width: 2,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade300,
+                        blurRadius: 6,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Toko Rekomendasi MinKang',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Store items (list of recommended stores)
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildStoreItem(
+                              'TB. Sinar Saluyu Putra SSP',
+                              'Bojongsoang',
+                              5.0,
+                              'TB. Sinar Saluyu Putra SSP Bojongsoang',
+                              'assets/sinar_saluyu.jpg',
+                            ),
+                            _buildStoreItem(
+                              'TB. Surya Jaya Putra',
+                              'Bojongsoang',
+                              4.7,
+                              'Tb Surya Jaya Putra Bojongsoang',
+                              'assets/surya_jaya.jpg',
+                            ),
+                            _buildStoreItem(
+                              'TB. Laksana Jaya',
+                              'Sukapura',
+                              4.3,
+                              'TB. Laksana Jaya Bojongsoang',
+                              'assets/laksana_jaya.jpg',
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // "Lihat lebih banyak..." button
+                      const SizedBox(height: 15),
+                      Center(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            // Navigate to MapScreen when the button is pressed
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MapScreen(),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.yellow.shade700,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                          ),
+                          icon: const Icon(Icons.map, color: Colors.white),
+                          label: const Text(
+                            'Lihat lebih banyak...',
+                            style: TextStyle(
+                              color: Colors.white,
+                              ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
+                const SizedBox(height: 15),
               ],
             ),
           ),
@@ -376,46 +446,52 @@ class HomeScreenContent extends StatelessWidget {
   }
 
   Widget _buildCategoryItem(IconData icon, String label, VoidCallback onTap) {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        bool isHovered = false;
-
-        return MouseRegion(
-          onEnter: (_) => setState(() => isHovered = true),
-          onExit: (_) => setState(() => isHovered = false),
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: onTap,
-            child: Column(
+    final ValueNotifier<bool> isHovered = ValueNotifier<bool>(false);
+    return MouseRegion(
+      onEnter: (_) => isHovered.value = true,
+      onExit: (_) => isHovered.value = false,
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: ValueListenableBuilder<bool>(
+          valueListenable: isHovered,
+          builder: (context, hovered, _) {
+            return Column(
               children: [
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color:
-                    isHovered
-                        ? Colors.purple.shade300
-                        : Colors.purple.shade100,
+                    color: hovered ? Colors.yellow.shade300 : Colors.yellow.shade100,
+                    boxShadow: hovered
+                        ? [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.4),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : [],
                   ),
                   padding: const EdgeInsets.all(15),
                   child: Icon(
                     icon,
-                    color: isHovered ? Colors.white : Colors.purple,
+                    color: hovered ? Colors.white : Colors.yellow.shade800,
                   ),
                 ),
                 const SizedBox(height: 5),
                 Text(
                   label,
                   style: TextStyle(
-                    color: isHovered ? Colors.purple : Colors.black,
-                    fontWeight: isHovered ? FontWeight.bold : FontWeight.normal,
+                    color: hovered ? Colors.yellow : Colors.black,
+                    fontWeight: hovered ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ],
-            ),
-          ),
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 
