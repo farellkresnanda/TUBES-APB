@@ -5,9 +5,7 @@ import 'profile/profile_screen.dart';
 import 'profile/history_screen.dart';
 import 'profile/settings_screen.dart';
 import 'package:tubes_1/screens/login_screen.dart';
-import 'package:tubes_1/screens/Bangunan/bangunan_screen.dart';
-import 'package:tubes_1/screens/Kelistrikan/kelistrikan_screen.dart';
-import 'package:tubes_1/screens/Air/air_screen.dart';
+import 'package:tubes_1/screens/Pesanan/pesanan_screen.dart';
 import 'cart_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:tubes_1/screens/ChatSection/ChatListScreen.dart';
@@ -319,23 +317,24 @@ class HomeScreenContent extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const BangunanScreen(),
+                          builder: (_) => const pesananScreen(kategori: 'Bangunan'),
                         ),
                       );
                     }),
-                    _buildCategoryItem(Icons.electrical_services, 'Kelistrikan',() {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const KelistrikanScreen(),
-                          ),
-                        );
-                      },
-                    ),
+                    _buildCategoryItem(Icons.electrical_services, 'Kelistrikan', () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const pesananScreen(kategori: 'Kelistrikan'),
+                        ),
+                      );
+                    }),
                     _buildCategoryItem(Icons.water_drop, 'Air', () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const AirScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const pesananScreen(kategori: 'Air'),
+                        ),
                       );
                     }),
                   ],

@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:tubes_1/screens/Air/air_invoice.dart';
+import 'package:tubes_1/screens/Pesanan/pesanan_invoice.dart';
 
-class FormPesanTukangScreenAir extends StatefulWidget {
-  const FormPesanTukangScreenAir({super.key});
+class FormPesan extends StatefulWidget {
+  final String displayLokasi;
+  final String kategori;
+
+
+  const FormPesan({super.key, required this.kategori, this.displayLokasi = 'Lokasi belum ditentukan'});
 
   @override
-  State<FormPesanTukangScreenAir> createState() => _FormPesanTukangScreenState();
+  State<FormPesan> createState() => _FormPesanScreenState();
 }
 
-class _FormPesanTukangScreenState extends State<FormPesanTukangScreenAir> {
+class _FormPesanScreenState extends State<FormPesan> {
   int jumlahTukang = 1;
   String selectedJamKerja = '12 jam';
 
@@ -33,9 +37,9 @@ class _FormPesanTukangScreenState extends State<FormPesanTukangScreenAir> {
                 ),
               ),
               child: Column(
-                children: const [
+                children: [
                   Text(
-                    "Cari tukang?, TukangKu Solusinya!",
+                    'Cari tukang?, TukangKu Solusinya! ${widget.kategori}',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -88,7 +92,7 @@ class _FormPesanTukangScreenState extends State<FormPesanTukangScreenAir> {
                     // Lokasi
                     buildRoundedBox(
                       icon: Icons.location_on,
-                      label: "Lokasi sudah ditentukan",
+                      label: "Lokasi: ${widget.displayLokasi}",
                     ),
 
                     const SizedBox(height: 20),
@@ -205,7 +209,7 @@ class _FormPesanTukangScreenState extends State<FormPesanTukangScreenAir> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const InvoiceScreenAir()),
+                    MaterialPageRoute(builder: (_) => const pesananInvoice()),
                   );
                 },
 

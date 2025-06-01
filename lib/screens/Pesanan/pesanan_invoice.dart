@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tubes_1/screens/home_screen.dart';
 
-class InvoiceScreenBangunan extends StatelessWidget {
-  const InvoiceScreenBangunan({super.key});
+class pesananInvoice extends StatelessWidget {
+  const pesananInvoice({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +114,7 @@ class InvoiceScreenBangunan extends StatelessWidget {
                 ),
                 child: const Text("Panggil Tukang"),
               ),
+
             ],
           ),
         ),
