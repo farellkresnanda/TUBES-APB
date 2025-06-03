@@ -5,8 +5,11 @@ class FormPesan extends StatefulWidget {
   final String displayLokasi;
   final String kategori;
 
-
-  const FormPesan({super.key, required this.kategori, this.displayLokasi = 'Lokasi belum ditentukan'});
+  const FormPesan({
+    super.key,
+    required this.kategori,
+    this.displayLokasi = 'Lokasi belum ditentukan',
+  });
 
   @override
   State<FormPesan> createState() => _FormPesanScreenState();
@@ -14,8 +17,7 @@ class FormPesan extends StatefulWidget {
 
 class _FormPesanScreenState extends State<FormPesan> {
   int jumlahTukang = 1;
-  String selectedJamKerja = '12 jam';
-
+  int selectedJamKerja = 12;
   final TextEditingController catatanController = TextEditingController();
 
   @override
@@ -57,17 +59,13 @@ class _FormPesanScreenState extends State<FormPesan> {
                   ),
                   Text(
                     "Mitra Terpercaya Penyedia Tenaga Konstruksi.",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.white),
                   ),
                 ],
               ),
             ),
 
             const SizedBox(height: 20),
-
             // Form Card
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -134,7 +132,6 @@ class _FormPesanScreenState extends State<FormPesan> {
                     ),
 
                     const SizedBox(height: 20),
-
                     // Jam kerja tukang
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -148,21 +145,27 @@ class _FormPesanScreenState extends State<FormPesan> {
                           const SizedBox(width: 8),
                           const Text("Tentukan jam kerja tukang"),
                           const Spacer(),
-                          DropdownButton<String>(
+                          DropdownButton<int>(
                             value: selectedJamKerja,
                             underline: const SizedBox(),
-                            onChanged: (String? newValue) {
+                            onChanged: (int? newValue) {
                               setState(() {
                                 selectedJamKerja = newValue!;
                               });
                             },
-                            items: <String>['6 jam', '8 jam', '10 jam', '12 jam']
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
+                            items:
+                                <int>[
+                                  3,
+                                  6,
+                                  8,
+                                  10,
+                                  12,
+                                ].map<DropdownMenuItem<int>>((int value) {
+                                  return DropdownMenuItem<int>(
+                                    value: value,
+                                    child: Text('$value jam'),
+                                  );
+                                }).toList(),
                           ),
                         ],
                       ),
@@ -172,7 +175,10 @@ class _FormPesanScreenState extends State<FormPesan> {
 
                     // Catatan
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey.shade400),
                         borderRadius: BorderRadius.circular(12),
@@ -201,15 +207,22 @@ class _FormPesanScreenState extends State<FormPesan> {
             ),
 
             const SizedBox(height: 20),
-
-            // Tombol Selanjutnya
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const pesananInvoice()),
+                    MaterialPageRoute(
+                      builder:
+                          (_) => pesananInvoice(
+                            kategori: widget.kategori,
+                            alamat: widget.displayLokasi,
+                            jumlah_tukang: jumlahTukang,
+                            jam_kerja: selectedJamKerja,
+                            deskripsi: catatanController.text,
+                          ),
+                    ),
                   );
                 },
 
@@ -226,7 +239,6 @@ class _FormPesanScreenState extends State<FormPesan> {
                 ),
               ),
             ),
-
             const SizedBox(height: 30),
           ],
         ),
@@ -242,10 +254,18 @@ class _FormPesanScreenState extends State<FormPesan> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: Colors.black54),
           const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontSize: 14)),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 14),
+              softWrap: true,
+              overflow: TextOverflow.visible,
+            ),
+          ),
         ],
       ),
     );

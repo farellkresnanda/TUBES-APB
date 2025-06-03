@@ -48,9 +48,8 @@ class _PesananScreenState extends State<pesananScreen> {
 
       final userId = user.id;
 
-      final List<Map<String, dynamic>> response = await supabase
-          .from('alamat_tersimpan')
-          .select();
+      final List<Map<String, dynamic>> response =
+          await supabase.from('alamat_tersimpan').select();
 
       setState(() {
         alamatList.clear();
@@ -65,13 +64,11 @@ class _PesananScreenState extends State<pesananScreen> {
           }
         }
       });
-      print('Alamat berhasil diambil untuk user $userId: $alamatList');
     } catch (e, stackTrace) {
       print('Terjadi kesalahan saat fetch alamat: $e');
       print('Stack trace: $stackTrace');
     }
   }
-
 
   Future<void> _getLocationFromDevice() async {
     try {
@@ -93,8 +90,9 @@ class _PesananScreenState extends State<pesananScreen> {
         return;
       }
 
-      Position position =
-          await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
 
       setState(() {
         latitude = position.latitude;
@@ -127,7 +125,7 @@ class _PesananScreenState extends State<pesananScreen> {
           place.subLocality,
           place.locality,
           place.administrativeArea,
-          place.country
+          place.country,
         ].where((element) => element != null && element.isNotEmpty).join(', ');
 
         setState(() {
@@ -205,49 +203,59 @@ class _PesananScreenState extends State<pesananScreen> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: (latitude != null && longitude != null)
-                            ? FlutterMap(
-                                mapController: mapController,
-                                options: MapOptions(
-                                  initialCenter: LatLng(latitude!, longitude!),
-                                  initialZoom: 16,
-                                  interactionOptions:
-                                      const InteractionOptions(flags: InteractiveFlag.all),
-                                  onTap: (tapPosition, point) async {
-                                    setState(() {
-                                      latitude = point.latitude;
-                                      longitude = point.longitude;
-                                      lokasiDipilih = true;
-                                    });
-                                    await _updateAddressFromCoordinates(latitude!, longitude!);
-                                  },
-                                ),
-                                children: [
-                                  TileLayer(
-                                    urlTemplate:
-                                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                    subdomains: const ['a', 'b', 'c'],
-                                    userAgentPackageName: 'com.example.yourappname',
-                                  ),
-                                  MarkerLayer(
-                                    markers: [
-                                      Marker(
-                                        width: 60.0,
-                                        height: 60.0,
-                                        point: LatLng(latitude!, longitude!),
-                                        child: const Icon(
-                                          Icons.location_pin,
-                                          color: Colors.red,
-                                          size: 40,
+                        child:
+                            (latitude != null && longitude != null)
+                                ? FlutterMap(
+                                  mapController: mapController,
+                                  options: MapOptions(
+                                    initialCenter: LatLng(
+                                      latitude!,
+                                      longitude!,
+                                    ),
+                                    initialZoom: 16,
+                                    interactionOptions:
+                                        const InteractionOptions(
+                                          flags: InteractiveFlag.all,
                                         ),
-                                      ),
-                                    ],
+                                    onTap: (tapPosition, point) async {
+                                      setState(() {
+                                        latitude = point.latitude;
+                                        longitude = point.longitude;
+                                        lokasiDipilih = true;
+                                      });
+                                      await _updateAddressFromCoordinates(
+                                        latitude!,
+                                        longitude!,
+                                      );
+                                    },
                                   ),
-                                ],
-                              )
-                            : const Center(
-                                child: Text('Menunggu lokasi...'),
-                              ),
+                                  children: [
+                                    TileLayer(
+                                      urlTemplate:
+                                          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                      subdomains: const ['a', 'b', 'c'],
+                                      userAgentPackageName:
+                                          'com.example.yourappname',
+                                    ),
+                                    MarkerLayer(
+                                      markers: [
+                                        Marker(
+                                          width: 60.0,
+                                          height: 60.0,
+                                          point: LatLng(latitude!, longitude!),
+                                          child: const Icon(
+                                            Icons.location_pin,
+                                            color: Colors.red,
+                                            size: 40,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )
+                                : const Center(
+                                  child: Text('Menunggu lokasi...'),
+                                ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -258,90 +266,100 @@ class _PesananScreenState extends State<pesananScreen> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade400),
-                        ),
-                        child: Row(
-                          children: const [
-                            Icon(Icons.bookmark, color: Colors.black54, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              "Alamat tersimpan",
-                              style: TextStyle(fontSize: 14, color: Colors.black87),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+
                     const SizedBox(height: 10),
                     Expanded(
-                      child: alamatList.isEmpty
-                        ? Center(
-                            child: Text(
-                              'Tidak ada alamat tersimpan',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          )
-                        :SingleChildScrollView(
-                          child: Column(
-                            children: alamatList.map((alamat) {
-                              final isSelected = alamat == displayLokasi;
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      displayLokasi = alamat;
-                                    });
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: isSelected
-                                        ? const Color.fromARGB(255, 240, 240, 240)
-                                        : Colors.transparent,
-                                    foregroundColor:
-                                        isSelected ? Colors.grey[600] : Colors.black,
-                                    elevation: 0,
-                                    side: const BorderSide(color: Colors.grey),
-                                    alignment: Alignment.centerLeft,
-                                    minimumSize: const Size.fromHeight(60),
-                                    padding: const EdgeInsets.all(8),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
+                      child:
+                          alamatList.isEmpty
+                              ? Center(
+                                child: Text(
+                                  'Tidak ada alamat tersimpan',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                    fontStyle: FontStyle.italic,
                                   ),
-                                  child: Text(alamat),
                                 ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
+                              )
+                              : SingleChildScrollView(
+                                child: Column(
+                                  children:
+                                      alamatList.map((alamat) {
+                                        final isSelected =
+                                            alamat == displayLokasi;
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 8.0,
+                                          ),
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                displayLokasi = alamat;
+                                              });
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  isSelected
+                                                      ? const Color.fromARGB(
+                                                        255,
+                                                        240,
+                                                        240,
+                                                        240,
+                                                      )
+                                                      : Colors.transparent,
+                                              foregroundColor:
+                                                  isSelected
+                                                      ? Colors.grey[600]
+                                                      : Colors.black,
+                                              elevation: 0,
+                                              side: const BorderSide(
+                                                color: Colors.grey,
+                                              ),
+                                              alignment: Alignment.centerLeft,
+                                              minimumSize:
+                                                  const Size.fromHeight(60),
+                                              padding: const EdgeInsets.all(8),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    alamat,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                Icon(
+                                                  Icons.bookmark,
+                                                  color: Colors.black54,
+                                                  size: 20,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                ),
+                              ),
+                    ),
                     const SizedBox(height: 12),
-                    // Tombol lokasi saat ini (tampilkan alamat perangkat sekarang)
                     ElevatedButton(
-                      onPressed: lokasiDipilih
-                          ? () {
-                              setState(() {
-                                _isPressed = !_isPressed;// toggle status
-                              });
-                            }
-                          : null,
+                      onPressed:
+                          lokasiDipilih
+                              ? () {
+                                setState(() {
+                                  _isPressed = !_isPressed;
+                                });
+                              }
+                              : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:Colors.grey.shade300 ,
-                        foregroundColor:Colors.grey[600],
+                        backgroundColor: Colors.grey.shade300,
+                        foregroundColor: Colors.grey[600],
                         elevation: 0,
                         side: const BorderSide(color: Colors.grey),
                         alignment: Alignment.centerLeft,
@@ -359,13 +377,13 @@ class _PesananScreenState extends State<pesananScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => FormPesan(
-                              displayLokasi: displayLokasi,
-                              kategori: kategori,
-                            ),
+                            builder:
+                                (context) => FormPesan(
+                                  displayLokasi: displayLokasi,
+                                  kategori: kategori,
+                                ),
                           ),
                         );
-
                       },
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size.fromHeight(50),
@@ -377,7 +395,10 @@ class _PesananScreenState extends State<pesananScreen> {
                       ),
                       child: const Text(
                         'Lanjutkan Pesan Tukang',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),

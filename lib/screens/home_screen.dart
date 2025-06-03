@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? username;
   int _selectedIndex = 0;
 
- @override
+  @override
   void initState() {
     super.initState();
     fetchUsername();
@@ -45,19 +45,19 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       });
       Future.delayed(const Duration(seconds: 3), () {
-       showDialog(
+        showDialog(
           context: context,
-          builder: (context) => RatingDialog(
-            onRated: (rating) {
-              print("User memberi rating: $rating");
-              // Bisa simpan ke database, Firebase, dsb.
-            },
-          ),
+          builder:
+              (context) => RatingDialog(
+                onRated: (rating) {
+                  print("User memberi rating: $rating");
+                  // Bisa simpan ke database, Firebase, dsb.
+                },
+              ),
         );
       });
     }
   }
-
 
   Future<void> fetchUsername() async {
     final user = Supabase.instance.client.auth.currentUser;
@@ -97,17 +97,14 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Keranjang',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Pesanan'),
           BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Pesan'),
         ],
       ),
     );
   }
 
-  Widget _buildNavigateToMap(){
+  Widget _buildNavigateToMap() {
     return IconButton(
       icon: const Icon(Icons.map, color: Colors.white),
       onPressed: () {
@@ -210,11 +207,13 @@ class _HomeScreenState extends State<HomeScreen> {
             .select('profile_picture')
             .eq('id', userId)
             .single();
-    
+
     final fileName = response['profile_picture'] as String?;
     if (fileName == null) return null;
-    
-    final String url = Supabase.instance.client.storage.from('profilepictures').getPublicUrl(fileName);
+
+    final String url = Supabase.instance.client.storage
+        .from('profilepictures')
+        .getPublicUrl(fileName);
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return '$url?ts=$timestamp';
   }
@@ -223,8 +222,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     ModalRoute.of(context)?.addScopedWillPopCallback(() {
-    if (mounted) setState(() {});
-    return Future.value(true);
+      if (mounted) setState(() {});
+      return Future.value(true);
     });
   }
 }
@@ -239,7 +238,6 @@ class HomeScreenContent extends StatelessWidget {
     required this.onProfileMenu,
   });
 
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -251,9 +249,7 @@ class HomeScreenContent extends StatelessWidget {
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage(
-                      Theme
-                          .of(context)
-                          .brightness == Brightness.light
+                      Theme.of(context).brightness == Brightness.light
                           ? 'assets/Background_1.png'
                           : 'assets/Background_2.png',
                     ),
@@ -317,18 +313,26 @@ class HomeScreenContent extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const pesananScreen(kategori: 'Bangunan'),
+                          builder:
+                              (_) => const pesananScreen(kategori: 'Bangunan'),
                         ),
                       );
                     }),
-                    _buildCategoryItem(Icons.electrical_services, 'Kelistrikan', () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const pesananScreen(kategori: 'Kelistrikan'),
-                        ),
-                      );
-                    }),
+                    _buildCategoryItem(
+                      Icons.electrical_services,
+                      'Kelistrikan',
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => const pesananScreen(
+                                  kategori: 'Kelistrikan',
+                                ),
+                          ),
+                        );
+                      },
+                    ),
                     _buildCategoryItem(Icons.water_drop, 'Air', () {
                       Navigator.push(
                         context,
@@ -346,10 +350,7 @@ class HomeScreenContent extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.yellow.shade300,
-                      width: 2,
-                    ),
+                    border: Border.all(color: Colors.yellow.shade300, width: 2),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.shade300,
@@ -409,7 +410,8 @@ class HomeScreenContent extends StatelessWidget {
                             // Navigate to MapScreen when the button is pressed
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const MapScreen(),
+                              MaterialPageRoute(
+                                builder: (context) => const MapScreen(),
                               ),
                             );
                           },
@@ -426,9 +428,7 @@ class HomeScreenContent extends StatelessWidget {
                           icon: const Icon(Icons.map, color: Colors.white),
                           label: const Text(
                             'Lihat lebih banyak...',
-                            style: TextStyle(
-                              color: Colors.white,
-                              ),
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
@@ -461,16 +461,20 @@ class HomeScreenContent extends StatelessWidget {
                   duration: const Duration(milliseconds: 200),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: hovered ? Colors.yellow.shade300 : Colors.yellow.shade100,
-                    boxShadow: hovered
-                        ? [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.4),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ]
-                        : [],
+                    color:
+                        hovered
+                            ? Colors.yellow.shade300
+                            : Colors.yellow.shade100,
+                    boxShadow:
+                        hovered
+                            ? [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.4),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                            : [],
                   ),
                   padding: const EdgeInsets.all(15),
                   child: Icon(
@@ -494,7 +498,13 @@ class HomeScreenContent extends StatelessWidget {
     );
   }
 
-  Widget _buildStoreItem(String name, String location, double rating, String mapsQuery, String imagePath) {
+  Widget _buildStoreItem(
+    String name,
+    String location,
+    double rating,
+    String mapsQuery,
+    String imagePath,
+  ) {
     return GestureDetector(
       onTap: () => _launchMaps(mapsQuery),
       child: Container(
@@ -536,9 +546,10 @@ class HomeScreenContent extends StatelessWidget {
     );
   }
 
-
   void _launchMaps(String query) async {
-    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(query)}');
+    final Uri url = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(query)}',
+    );
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {

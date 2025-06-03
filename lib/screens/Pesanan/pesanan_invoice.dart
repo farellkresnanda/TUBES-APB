@@ -1,8 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:tubes_1/screens/home_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 
 class pesananInvoice extends StatelessWidget {
-  const pesananInvoice({super.key});
+  final String alamat;
+  final String kategori;
+  final String deskripsi;
+  final int jumlah_tukang;
+  final int jam_kerja;
+
+  const pesananInvoice({
+    super.key,
+    this.alamat = '',
+    this.kategori = '',
+    this.deskripsi = '',
+    this.jumlah_tukang = 1,
+    this.jam_kerja = 1,
+  });
+
+  Future<void> cekAlamat() async {
+    final supabase = Supabase.instance.client;
+    try {
+      final response = await supabase
+          .from('alamat_tersimpan')
+          .select('*')
+          .eq('alamat', alamat);
+      if (response.isEmpty) {
+        await supabase.from('alamat_tersimpan').insert({'alamat': alamat});
+      }
+    } catch (error) {
+      print('Error saat mengirim pesanan: $error');
+    }
+  }
+
+  String formatRupiah(int amount) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+    return formatter.format(amount);
+  }
+
+  int hitungTotalHarga() {
+    final hargaPerJam = {
+      'Tukang Bangunan': 35000,
+      'Tukang Listrik': 40000,
+      'Tukang Air': 38000,
+    };
+
+    final harga = hargaPerJam[kategori] ?? 35000;
+    final total = harga * jam_kerja * jumlah_tukang;
+    return total;
+  }
+
+  Future<void> submitPesanan(BuildContext context) async {
+    final supabase = Supabase.instance.client;
+
+    try {
+      final response =
+          await supabase.from('pesanan').insert({
+            'kategori': kategori,
+            'alamat': alamat,
+            'jumlah_tukang': jumlah_tukang,
+            'jam_kerja': jam_kerja,
+            'deskripsi': deskripsi,
+            'proses': 'diproses',
+            'user_id': supabase.auth.currentUser?.id,
+            'total_harga': hitungTotalHarga(),
+          }).select();
+      cekAlamat();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder:
+              (_) =>
+                  const HomeScreen(successMessage: "Tukang Berhasil Dipesan"),
+        ),
+      );
+    } catch (error) {
+      print('Error saat mengirim pesanan: $error');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal mengirim pesanan')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +104,19 @@ class pesananInvoice extends StatelessWidget {
                   children: const [
                     Text(
                       "Cari tukang?, TukangKu Solusinya!",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     SizedBox(height: 20),
                     Text(
                       "TukangKu",
-                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
                     Text(
                       "Mitra Terpercaya Penyedia Tenaga Konstruksi.",
@@ -46,7 +136,11 @@ class pesananInvoice extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
-                    BoxShadow(color: Colors.grey.shade300, blurRadius: 6, offset: const Offset(0, 3)),
+                    BoxShadow(
+                      color: Colors.grey.shade300,
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
                   ],
                 ),
                 child: Column(
@@ -54,7 +148,10 @@ class pesananInvoice extends StatelessWidget {
                   children: [
                     const Text(
                       "Ringkasan pembayaran",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -77,13 +174,28 @@ class pesananInvoice extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
-                        children: const [
-                          _InvoiceRow(title: "Harga", amount: "Rp.0"),
-                          _InvoiceRow(title: "Biaya perjalanan", amount: "Rp.0"),
-                          _InvoiceRow(title: "Biaya asuransi tukang", amount: "Rp.0"),
-                          _InvoiceRow(title: "Diskon", amount: "Rp.0"),
-                          Divider(),
-                          _InvoiceRow(title: "Total pembayaran", amount: "Rp.0", isBold: true),
+                        children: [
+                          _InvoiceRow(
+                            title: "Harga",
+                            amount: formatRupiah(hitungTotalHarga()),
+                          ),
+                          _InvoiceRow(
+                            title: "Biaya perjalanan",
+                            amount: formatRupiah(20000),
+                          ),
+                          _InvoiceRow(
+                            title: "Biaya asuransi tukang",
+                            amount: formatRupiah(10000),
+                          ),
+                          const _InvoiceRow(title: "Diskon", amount: "Rp0"),
+                          const Divider(),
+                          _InvoiceRow(
+                            title: "Total pembayaran",
+                            amount: formatRupiah(
+                              hitungTotalHarga() + 20000 + 10000,
+                            ),
+                            isBold: true,
+                          ),
                         ],
                       ),
                     ),
@@ -96,25 +208,20 @@ class pesananInvoice extends StatelessWidget {
               // Tombol
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const HomeScreen(
-                        successMessage: "Tukang Berhasil Dipesan",
-                      ),
-                    ),
-                  );
+                  submitPesanan(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 14,
+                  ),
                 ),
                 child: const Text("Panggil Tukang"),
               ),
-
             ],
           ),
         ),
@@ -143,11 +250,15 @@ class _InvoiceRow extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
+            style: TextStyle(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
           Text(
             amount,
-            style: TextStyle(fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
+            style: TextStyle(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ],
       ),
