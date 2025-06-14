@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
         } else if (value == 'history') {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const HistoryScreen()),
+            MaterialPageRoute(builder: (_) => HistoryScreen()),
           );
         } else if (value == 'settings') {
           Navigator.push(
